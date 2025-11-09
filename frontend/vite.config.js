@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   server: {
     proxy: {
-      '/api': 'http://localhost:5600'
+      '/api': 'https://my-portfolio-r5z0.onrender.com'
     }
   },
      base: '/', 

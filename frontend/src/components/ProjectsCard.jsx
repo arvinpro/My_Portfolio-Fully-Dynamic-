@@ -13,7 +13,7 @@ const ProjectCard = ({ project, index, onEdit, onDelete }) => {
       {/* IMAGE */}
       <div className="relative overflow-hidden">
         <img
-          src={`http://localhost:5600${project.imageUrl}`}
+          src={`https://my-portfolio-r5z0.onrender.com${project.imageUrl}`}
           alt={project.title}
           className="w-full h-44 sm:h-52 md:h-60 lg:h-64 object-cover rounded-t-2xl 
                      transition-transform duration-500 group-hover:scale-110"

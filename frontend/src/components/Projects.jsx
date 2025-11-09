@@ -18,7 +18,7 @@ function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get("http://localhost:5600/api/projects");
+        const res = await axios.get("https://my-portfolio-r5z0.onrender.com/api/projects");
         setProjects(res.data);
       } catch (err) {
         console.error("Failed to fetch projects:", err);
