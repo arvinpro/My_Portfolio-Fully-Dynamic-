@@ -129,7 +129,7 @@ function Contact() {
     const formData = { name: name.trim(), email: email.trim(), message: message.trim() };
 
     try {
-      const response = await axios.post('http://localhost:5600/api/contact', formData); //send mail ma problem ayo vani yaha check gara /api/contact thapya ho
+      const response = await axios.post('/api/contact', formData); //send mail ma problem ayo vani yaha check gara /api/contact thapya ho
 
       if (response.status === 200) {
         setSubmitStatus({
