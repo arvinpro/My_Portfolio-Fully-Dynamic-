@@ -59,9 +59,10 @@ function About() {
               <div className="mt-6 sm:mt-8">
                 <button
                   onClick={handleDownload}
-                  className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 sm:px-8 bg-purple-500 hover:bg-purple-600 text-white text-sm sm:text-base font-medium rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 shadow-lg hover:shadow-xl cursor-pointer"
+                  className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 sm:px-8 bg-purple-500 hover:bg-purple-600 text-white text-sm sm:text-base font-medium rounded-xl transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 shadow-lg hover:shadow-xl cursor-not-allowed"
+                  disabled
                 >
-                  <span>Download CV (PDF)</span>
+                  <del>Download CV (PDF)</del>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-4 w-4 sm:h-5 sm:w-5 ml-2"
