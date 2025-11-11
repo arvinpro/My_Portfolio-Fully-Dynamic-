@@ -17,8 +17,9 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
+
 const app = express();
-const PORT = process.env.PORT || 5600;
+const PORT = process.env.PORT;
 
 // ✅ Use correct MongoDB URI variable
 const MONGO_URI = process.env.MONGODB_URL || process.env.MONGO_URI;
@@ -43,7 +44,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.use(cors());
+app.use(cors({ origin: "https://my-portfolio-r5z0.onrender.com" }));
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
