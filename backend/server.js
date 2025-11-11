@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-app.use(cors({ origin: "https://my-portfolio-r5z0.onrender.com" }));
+app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
