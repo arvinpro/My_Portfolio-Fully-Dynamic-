@@ -6,6 +6,7 @@ import projectRoutes from "./routes/projectRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
+
 dotenv.config();
 
 const app = express();
@@ -35,6 +36,11 @@ app.get(/^(?!\/api).*/, (req, res) => {
 app.get("/", (req, res) => {
   res.send("✅ Backend server running successfully!");
 });
+
+
+
+
+
 
 // ✅ Start server
 const PORT = process.env.PORT || 8989;
