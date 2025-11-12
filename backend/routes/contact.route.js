@@ -30,4 +30,31 @@ contactRouter.get("/", async (req, res) => {
   }
 });
 
+// DELETE a message by ID (temporary solution)
+contactRouter.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(`🗑️ DELETE /api/contact/${id} - Attempting to delete message`);
+  
+  try {
+    // Validate MongoDB ObjectId format
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      console.log(`❌ Invalid ID format: ${id}`);
+      return res.status(400).json({ message: "Invalid ID format" });
+    }
+
+    const message = await Contact.findById(id);
+    if (!message) {
+      console.log(`❌ Message not found with ID: ${id}`);
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    await message.deleteOne();
+    console.log(`✅ Successfully deleted message: ${id}`);
+    res.status(200).json({ message: "Message deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting message:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default contactRouter;

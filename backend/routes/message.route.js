@@ -3,34 +3,30 @@ import Contact from "../models/contact.js";
 
 const messageRouter = express.Router();
 
-// ✅ GET all messages with pagination
+// ✅ GET all messages
 messageRouter.get("/", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
-    const skip = (page - 1) * limit;
-
-    const total = await Contact.countDocuments();
-    const messages = await Contact.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    // ✅ Always return an array and total
-    res.status(200).json({
-      success: true,
-      messages,
-      total,
-    });
-  } catch (error) {
-    console.error("Error fetching messages:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch messages",
-      error: error.message,
-    });
+    const messages = await Contact.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, messages });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch messages" });
   }
 });
 
-// ✅ Correct export
+// ✅ DELETE a message by ID
+messageRouter.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const message = await Contact.findById(id);
+    if (!message) return res.status(404).json({ message: "Message not found" });
+
+    await message.deleteOne();
+    res.status(200).json({ message: "Message deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 export default messageRouter;

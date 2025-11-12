@@ -5,9 +5,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./db/connect.js";
 import contactRouter from "./routes/contact.route.js";
-import messageRouter from "./routes/message.route.js";
 import projectRouter from "./routes/project.routes.js";
 import morgan from "morgan";
+import messageRouter from "./routes/message.route.js";
 
 
 dotenv.config();
