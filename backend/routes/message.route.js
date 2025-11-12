@@ -1,10 +1,10 @@
 import express from "express";
 import Contact from "../models/contact.js";
 
-const routers = express.Router();
+const messageRouter = express.Router();
 
 // ✅ GET all messages with pagination
-routers.get("/", async (req, res) => {
+messageRouter.get("/", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -33,4 +33,4 @@ routers.get("/", async (req, res) => {
 });
 
 // ✅ Correct export
-export default routers;
+export default messageRouter;

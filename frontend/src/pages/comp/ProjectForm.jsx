@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { FaGithub, FaExternalLinkAlt, FaEdit, FaTrash } from "react-icons/fa";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FaEdit, FaExternalLinkAlt, FaGithub, FaTrash } from "react-icons/fa";
+import api from "../../utils/api";
+import React from "react";
+
+
 
 const ProjectForm = () => {
   const [projects, setProjects] = useState([]);
@@ -24,7 +26,7 @@ const ProjectForm = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get("/api/projects");
+        const res = await api.get("/api/projects");
         setProjects(res.data);
       } catch (err) {
         console.error("Error fetching projects:", err);
@@ -83,7 +85,7 @@ const ProjectForm = () => {
     try {
       let res;
       if (editId) {
-        res = await axios.put(`/api/projects/${editId}`, data, {
+        res = await api.put(`/api/projects/${editId}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setProjects((prev) =>
@@ -91,7 +93,7 @@ const ProjectForm = () => {
         );
         setEditId(null);
       } else {
-        res = await axios.post("/api/projects", data, {
+        res = await api.post("/api/projects", data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setProjects([res.data, ...projects]);
@@ -123,7 +125,7 @@ const ProjectForm = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure?")) return;
     try {
-      await axios.delete(`/api/projects/${id}`);
+      await api.delete(`/api/projects/${id}`);
       setProjects(projects.filter((p) => p._id !== id));
     } catch (error) {
       console.error(error);

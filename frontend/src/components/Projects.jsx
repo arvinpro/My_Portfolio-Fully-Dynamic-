@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
-import { Github, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import React, {  useEffect, useMemo, useState } from "react";
+import api from "../utils/api";
 import ProjectCard from "./ProjectsCard"; // Your ProjectCard component
 
 function Projects() {
@@ -18,7 +18,7 @@ function Projects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await axios.get("https://my-portfolio-r5z0.onrender.com/api/projects");
+        const res = await api.get("/api/projects");
         setProjects(res.data);
       } catch (err) {
         console.error("Failed to fetch projects:", err);
@@ -95,7 +95,14 @@ function Projects() {
     gsap.fromTo(
       ".project-card",
       { y: 50, opacity: 0, scale: 0.9 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.7)" }
+      {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+      }
     );
   }, [currentProjects]);
 
@@ -106,7 +113,10 @@ function Projects() {
   }
 
   return (
-    <section id="projects" className=" py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 relative overflow-hidden ">
+    <section
+      id="projects"
+      className=" py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 relative overflow-hidden "
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-6xl font-bold text-white mb-4">
@@ -154,7 +164,7 @@ function Projects() {
             <option value="oldest">Oldest First</option>
             <option value="title">Title A-Z</option>
             <option value="category">Category</option>
-          </select>    
+          </select>
         </div>
 
         {/* Projects Grid */}
@@ -177,43 +187,44 @@ function Projects() {
         )}
 
         {/* Pagination */}
-<div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12">
-  <div className="flex gap-2">
-    {/* Previous Button */}
-    <button
-      onClick={() => handlePageChange(currentPage - 1)}
-      disabled={currentPage === 1}
-      className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white text-sm font-medium rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-    >
-      <ChevronLeft className="w-4 h-4" /> Previous
-    </button>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-12">
+          <div className="flex gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white text-sm font-medium rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            >
+              <ChevronLeft className="w-4 h-4" /> Previous
+            </button>
 
-    {/* Page Numbers */}
-    {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-      <button
-        key={number}
-        onClick={() => handlePageChange(number)}
-        className={`px-4 py-2 rounded-xl text-sm font-medium ${
-          number === currentPage
-            ? "bg-purple-600 text-white"
-            : "bg-white/10 text-gray-300 hover:bg-purple-500 hover:text-white"
-        } transition-all duration-300`}
-      >
-        {number}
-      </button>
-    ))}
+            {/* Page Numbers */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (number) => (
+                <button
+                  key={number}
+                  onClick={() => handlePageChange(number)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium ${
+                    number === currentPage
+                      ? "bg-purple-600 text-white"
+                      : "bg-white/10 text-gray-300 hover:bg-purple-500 hover:text-white"
+                  } transition-all duration-300`}
+                >
+                  {number}
+                </button>
+              )
+            )}
 
-    {/* Next Button */}
-    <button
-      onClick={() => handlePageChange(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white text-sm font-medium rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-    >
-      Next <ChevronRight className="w-4 h-4" />
-    </button>
-  </div>
-</div>
-
+            {/* Next Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white text-sm font-medium rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );
