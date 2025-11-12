@@ -1,3 +1,103 @@
-# Environment files
+# Node.js backend .gitignore
+# See https://github.com/github/gitignore/blob/main/Node.gitignore for reference
+
+# Dependency directories
+node_modules/
+.pnp/
+.pnp.js
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
 .env
-backend/node_modules
+.env.*.local
+.env.local
+
+# Build output
+dist/
+build/
+tmp/
+temp/
+out/
+lib/
+public/build/
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# IDE specific
+*.iml
+*.classpath
+*.project
+*.settings/
+
+# Debug and inspector files
+*.tgz
+*.log.*
+debug.log
+
+# Bundler / package manager lockfiles (committing lockfiles is often recommended;
+# uncomment the following lines if you DO NOT want to commit them)
+# bun.lock
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Mac/Linux swap
+.*.swp
+*.sw?
+
+# Misc
+coverage/
+reports/
+tmp/
+.cache/
+.cache-loader/
+parcel-cache/
+.storybook/out/
+
+# Docker
+.Dockerfile.swp
+docker-compose.override.yml
+
+# Byebug output
+.byebug_history
+
+# Persisted local build tool caches
+.rollup.cache/
+.eslintcache
+
+# End of file
