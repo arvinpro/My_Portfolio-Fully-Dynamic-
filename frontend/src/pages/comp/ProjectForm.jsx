@@ -16,35 +16,9 @@ const ProjectForm = () => {
     image: null,
   });
   const [editId, setEditId] = useState(null);
-
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const messagesPerPage = 5;
-  const [totalMessages, setTotalMessages] = useState(0);
-
-  // Fetch messages with pagination
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(
-          `/api/messages?page=${currentPage}&limit=${messagesPerPage}`
-        );
-        const msgs = res.data.messages || []; // Ensure it's always an array
-        setMessages(msgs);
-        setTotalMessages(res.data.total || msgs.length);
-      } catch (err) {
-        console.error("Error fetching messages", err);
-        setMessages([]);
-        setTotalMessages(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMessages();
-  }, [currentPage]);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch projects
   useEffect(() => {
@@ -53,7 +27,7 @@ const ProjectForm = () => {
         const res = await axios.get("/api/projects");
         setProjects(res.data);
       } catch (err) {
-        console.error("Error fetching projects", err);
+        console.error("Error fetching projects:", err);
       }
     };
     fetchProjects();
@@ -61,25 +35,66 @@ const ProjectForm = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "image") setFormData({ ...formData, image: files[0] });
-    else setFormData({ ...formData, [name]: value });
+    if (name === "image") {
+      const file = files[0];
+      if (!file) return;
+
+      const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        setUploadError(
+          "Please upload a valid image file (JPEG, PNG, WebP, or GIF)"
+        );
+        e.target.value = "";
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setUploadError("File size must be less than 5MB");
+        e.target.value = "";
+        return;
+      }
+
+      setUploadError(null);
+      setFormData({ ...formData, image: file });
+
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setUploadError(null);
+
     const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+    if (formData.image) data.append("image", formData.image);
+    data.append("title", formData.title);
+    data.append("description", formData.description);
+    data.append("liveLink", formData.liveLink);
+    data.append("github", formData.github);
+    data.append("category", formData.category);
+    data.append("technologies", formData.technologies);
+    data.append("year", formData.year);
 
     try {
+      let res;
       if (editId) {
-        const res = await axios.put(`/api/projects/${editId}`, data);
+        res = await axios.put(`/api/projects/${editId}`, data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
         setProjects((prev) =>
           prev.map((p) => (p._id === editId ? res.data : p))
         );
         setEditId(null);
       } else {
-        const res = await axios.post("/api/projects", data);
-        setProjects([...projects, res.data]);
+        res = await axios.post("/api/projects", data, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        setProjects([res.data, ...projects]);
       }
 
       setFormData({
@@ -92,9 +107,16 @@ const ProjectForm = () => {
         year: "",
         image: null,
       });
+      setImagePreview(null);
+
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = "";
     } catch (error) {
       console.error(error);
-      alert("Error uploading project");
+      setUploadError(error.response?.data?.message || "Upload error");
+      alert(uploadError);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,6 +127,7 @@ const ProjectForm = () => {
       setProjects(projects.filter((p) => p._id !== id));
     } catch (error) {
       console.error(error);
+      alert("Delete error");
     }
   };
 
@@ -120,41 +143,45 @@ const ProjectForm = () => {
       year: proj.year,
       image: null,
     });
+    setImagePreview(proj.imageUrl || null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Render messages safely
-  const renderMessages = () => {
-    if (loading) return <p className="text-center">Loading messages...</p>;
-    if (!Array.isArray(messages) || messages.length === 0)
-      return <p className="text-center text-gray-500">No messages found.</p>;
-
-    return messages.map((msg) => (
-      <div
-        key={msg._id}
-        className="bg-white shadow-md rounded-xl p-4 border hover:shadow-lg transition"
-      >
-        <h3 className="text-lg font-semibold">{msg.name}</h3>
-        <p className="text-sm text-gray-500">{msg.email}</p>
-        <p className="mt-2 text-gray-700">{msg.message}</p>
-        <p className="text-xs text-gray-400 mt-1">
-          {new Date(msg.createdAt).toLocaleString()}
-        </p>
-      </div>
-    ));
+  const handleCancelEdit = () => {
+    setEditId(null);
+    setFormData({
+      title: "",
+      description: "",
+      liveLink: "",
+      github: "",
+      category: "",
+      technologies: "",
+      year: "",
+      image: null,
+    });
+    setImagePreview(null);
+    setUploadError(null);
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = "";
   };
-
-  const totalPages = Math.ceil(totalMessages / messagesPerPage);
 
   return (
     <div className="max-w-7xl mx-auto py-12 px-5">
-      {/* -------- Projects Form -------- */}
       <h2 className="text-3xl font-bold text-center mb-8 text-blue-600">
         {editId ? "Edit Project" : "Add New Project"}
       </h2>
+
+      {uploadError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">
+          {uploadError}
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-xl space-y-6 transition"
       >
+        {/* Title & Category */}
         <div className="grid md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -175,6 +202,7 @@ const ProjectForm = () => {
           />
         </div>
 
+        {/* Description */}
         <textarea
           name="description"
           placeholder="Project Description"
@@ -184,6 +212,7 @@ const ProjectForm = () => {
           className="border rounded-xl p-3 w-full focus:ring-2 focus:ring-blue-400 transition"
         ></textarea>
 
+        {/* Live & GitHub */}
         <div className="grid md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -203,6 +232,7 @@ const ProjectForm = () => {
           />
         </div>
 
+        {/* Technologies & Year */}
         <div className="grid md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -222,22 +252,53 @@ const ProjectForm = () => {
           />
         </div>
 
-        <input
-          type="file"
-          name="image"
-          onChange={handleChange}
-          className="border rounded-xl p-3 w-full focus:ring-2 focus:ring-blue-400 transition"
-        />
+        {/* Image Upload */}
+        <div>
+          <label className="block text-sm font-medium mb-2">
+            Project Image{" "}
+            {editId && !formData.image && "(Leave empty to keep current image)"}
+          </label>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleChange}
+            className="border rounded-xl p-3 w-full focus:ring-2 focus:ring-blue-400 transition"
+          />
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="mt-4 w-48 h-32 object-cover rounded-xl border"
+            />
+          )}
+        </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-semibold"
-        >
-          {editId ? "Update Project" : "Add Project"}
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting
+              ? "Uploading..."
+              : editId
+              ? "Update Project"
+              : "Add Project"}
+          </button>
+          {editId && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition font-semibold"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
-      {/* -------- Projects Grid -------- */}
+      {/* Projects Grid */}
       <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {projects.map((proj) => (
           <div
@@ -245,10 +306,18 @@ const ProjectForm = () => {
             className="bg-white dark:bg-gray-800 shadow-lg rounded-3xl overflow-hidden hover:shadow-2xl transition transform hover:-translate-y-1"
           >
             <img
-              src={proj.imageUrl}
+              src={
+                proj.imageUrl ||
+                "https://dummyimage.com/400x300/cccccc/000000&text=No+Image"
+              }
               alt={proj.title}
               className="w-full h-48 object-cover"
+              onError={(e) => {
+                e.target.src =
+                  "https://dummyimage.com/400x300/cccccc/000000&text=No+Image";
+              }}
             />
+
             <div className="p-4">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white">
                 {proj.title}
@@ -263,6 +332,7 @@ const ProjectForm = () => {
                   <a
                     href={proj.liveLink}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="text-green-600 hover:text-green-800 transition"
                   >
                     <FaExternalLinkAlt />
@@ -272,6 +342,7 @@ const ProjectForm = () => {
                   <a
                     href={proj.github}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition"
                   >
                     <FaGithub />
@@ -293,49 +364,6 @@ const ProjectForm = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* -------- Messages Section -------- */}
-      <h2 className="text-3xl font-bold text-center mt-16 mb-8 text-blue-600">
-        Contact Form Data
-      </h2>
-      <div className="p-6 max-w-3xl mx-auto grid gap-4">
-        {renderMessages()}
-
-        {/* -------- Pagination -------- */}
-        {totalPages > 1 && (
-          <div className="flex justify-center items-center mt-6 space-x-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="p-2 bg-gray-100 rounded-full disabled:opacity-40 hover:bg-gray-200 transition"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 rounded-lg text-sm ${
-                  currentPage === i + 1
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() =>
-                setCurrentPage((p) => Math.min(p + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              className="p-2 bg-gray-100 rounded-full disabled:opacity-40 hover:bg-gray-200 transition"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
