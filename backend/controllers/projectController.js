@@ -1,5 +1,5 @@
-import Project from "../models/project.js";
 import { v2 as cloudinary } from "cloudinary";
+import Project from "../models/project.js";
 
 // Cloudinary config
 cloudinary.config({
@@ -8,47 +8,45 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Upload buffer to Cloudinary using upload_stream (more reliable)
 const uploadToCloudinary = async (fileBuffer, mimetype) => {
   if (!fileBuffer) return "";
-  
+  // upload_stream works with callbacks and a writable stream; wrap in a Promise
   return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
+    const stream = cloudinary.uploader.upload_stream(
       {
         folder: "projects",
         resource_type: "auto",
         allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"],
       },
       (error, result) => {
-        if (error) {
-          console.error("Cloudinary upload error:", error);
-          reject(error);
-        } else {
-          console.log("✅ Upload successful:", result.secure_url);
-          resolve(result.secure_url);
-        }
+        if (error) return reject(error);
+        // result contains secure_url, public_id, etc.
+        return resolve(result && result.secure_url ? result.secure_url : "");
       }
     );
 
-    // End the stream with the buffer
-    uploadStream.end(fileBuffer);
+    // Write the buffer to the stream and close it
+    stream.end(fileBuffer);
   });
 };
 
 // CREATE PROJECT
 export const createProject = async (req, res) => {
   try {
-    console.log("📁 File received:", req.file ? {
-      fieldname: req.file.fieldname,
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size
-    } : "No file");
-    
-    console.log("📝 Body data:", req.body);
+    console.log(
+      "📁 File received:",
+      req.file
+        ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+          }
+        : "No file"
+    );
 
     let imageUrl = "";
-    
+
     if (req.file) {
       imageUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
     }
@@ -73,10 +71,10 @@ export const createProject = async (req, res) => {
     res.status(201).json(saved);
   } catch (err) {
     console.error("❌ Create project error:", err);
-    res.status(500).json({ 
-      message: "Server error", 
+    res.status(500).json({
+      message: "Server error",
       error: err.message,
-      details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      details: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   }
 };
@@ -98,14 +96,19 @@ export const updateProject = async (req, res) => {
     const project = await Project.findById(req.params.id);
     if (!project) return res.status(404).json({ message: "Project not found" });
 
-    console.log("📁 Update file received:", req.file ? {
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size
-    } : "No new file");
+    console.log(
+      "📁 Update file received:",
+      req.file
+        ? {
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+          }
+        : "No new file"
+    );
 
     let imageUrl = project.imageUrl;
-    
+
     if (req.file) {
       imageUrl = await uploadToCloudinary(req.file.buffer, req.file.mimetype);
       console.log("✅ New image uploaded:", imageUrl);
@@ -127,9 +130,9 @@ export const updateProject = async (req, res) => {
     res.json(updated);
   } catch (err) {
     console.error("❌ Update project error:", err);
-    res.status(500).json({ 
+    res.status(500).json({
       message: err.message,
-      error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      error: process.env.NODE_ENV === "development" ? err.stack : undefined,
     });
   }
 };
@@ -146,14 +149,17 @@ export const deleteProject = async (req, res) => {
     if (project.imageUrl) {
       try {
         // Extract public_id from URL
-        const urlParts = project.imageUrl.split('/');
+        const urlParts = project.imageUrl.split("/");
         const publicIdWithExt = urlParts[urlParts.length - 1];
-        const publicId = `projects/${publicIdWithExt.split('.')[0]}`;
-        
+        const publicId = `projects/${publicIdWithExt.split(".")[0]}`;
+
         await cloudinary.uploader.destroy(publicId);
         console.log("✅ Image deleted from Cloudinary");
       } catch (cloudinaryErr) {
-        console.error("⚠️ Could not delete image from Cloudinary:", cloudinaryErr);
+        console.error(
+          "⚠️ Could not delete image from Cloudinary:",
+          cloudinaryErr
+        );
         // Continue with project deletion even if image deletion fails
       }
     }
