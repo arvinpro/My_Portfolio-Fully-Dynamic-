@@ -2,6 +2,11 @@ import React from "react";
 import { Github } from "lucide-react";
 
 const ProjectCard = ({ project, index, onEdit, onDelete }) => {
+  const imageSrc =
+    project.imageUrl?.startsWith("http")
+      ? project.imageUrl
+      : `https://my-portfolio-r5z0.onrender.com${project.imageUrl}`;
+
   return (
     <div
       className="group bg-white/10 dark:bg-gray-800/30 backdrop-blur-xl rounded-2xl shadow-lg
@@ -18,6 +23,9 @@ const ProjectCard = ({ project, index, onEdit, onDelete }) => {
           className="w-full h-44 sm:h-52 md:h-60 lg:h-64 object-cover rounded-t-2xl
                      transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = "https://placehold.co/400x300?text=No+Image";
+          }}
         />
 
         {/* Overlay */}
