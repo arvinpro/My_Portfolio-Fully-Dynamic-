@@ -15,19 +15,32 @@ function Projects() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch projects from backend
-  useEffect(() => {
-    const fetchProjects = async () => {
+ useEffect(() => {
+  const fetchProjects = async () => {
+    const maxRetries = 3;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const res = await api.get("/api/projects");
         setProjects(res.data);
+        return; // success → exit retry loop
       } catch (err) {
-        console.error("Failed to fetch projects:", err);
-      } finally {
-        setIsLoading(false);
+        console.error(`Attempt ${attempt} failed`);
+
+        if (attempt === maxRetries) {
+          console.error("All retries failed:", err);
+        }
+
+        // Wait before retrying
+        await new Promise((resolve) => setTimeout(resolve, 1500));
       }
-    };
-    fetchProjects();
-  }, []);
+    }
+
+    setIsLoading(false);
+  };
+
+  fetchProjects();
+}, []);
 
   // Unique categories
   const categories = useMemo(() => {
@@ -182,7 +195,7 @@ function Projects() {
           </div>
         ) : (
           <div className="text-center py-20 text-gray-400">
-            No projects found. Try adjusting your search or filters.
+            No projects found. As there is problem in backen, please refresh the page!
           </div>
         )}
 
