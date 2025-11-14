@@ -51,7 +51,11 @@ function Hero() {
             I'M ARVIN <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">MAHATO</span>
           </h1>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-3">
+<<<<<<< HEAD
            Full-Stack<span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">DEVELOPER</span>
+=======
+            Full-Stack <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">DEVELOPER</span>
+>>>>>>> 30522e518a01885e5c8fb52bc82cf72cb9590303
           </h1>
           <h1 className="max-w-2xl mx-auto mt-4 text-lg sm:text-xl md:text-2xl">
             Crafting Inovative Softwares With MERN Technologies.
