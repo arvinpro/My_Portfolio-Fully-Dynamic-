@@ -4,7 +4,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "https://my-portfolio-r5z0.onrender.com",
   //   baseURL: "http://localhost:8989",
-  timeout: 10000, // 10 seconds timeout
+  timeout: 30000, // 10 seconds timeout
   headers: {
     "Content-Type": "application/json",
   },
