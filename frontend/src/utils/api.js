@@ -3,8 +3,8 @@ import axios from "axios";
 // Create axios instance with base URL
 const api = axios.create({
   baseURL: "https://my-portfolio-r5z0.onrender.com",
-  //   baseURL: "http://localhost:8989",
-  timeout: 60000, // 10 seconds timeout
+
+  timeout: 60000, 
   headers: {
     "Content-Type": "application/json",
   },

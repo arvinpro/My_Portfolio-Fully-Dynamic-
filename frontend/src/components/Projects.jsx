@@ -15,7 +15,8 @@ function Projects() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch projects from backend
- useEffect(() => {
+
+useEffect(() => {
   const fetchProjects = async () => {
     const maxRetries = 3;
 
@@ -23,24 +24,24 @@ function Projects() {
       try {
         const res = await api.get("/api/projects");
         setProjects(res.data);
-        return; // success → exit retry loop
+        setIsLoading(false);   // <-- FIXED HERE
+        return;                // exit after success
       } catch (err) {
-        console.error(`Attempt ${attempt} failed`);
+        console.error(`Attempt ${attempt} failed`, err);
 
         if (attempt === maxRetries) {
-          console.error("All retries failed:", err);
+          setIsLoading(false); // <-- also handle final failure
         }
 
-        // Wait before retrying
         await new Promise((resolve) => setTimeout(resolve, 1500));
       }
     }
-
-    setIsLoading(false);
   };
 
   fetchProjects();
 }, []);
+
+
 
   // Unique categories
   const categories = useMemo(() => {
